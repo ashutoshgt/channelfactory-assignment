@@ -13,7 +13,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the project code into the container
-COPY . .
+COPY manage.py .
+COPY api/* ./api/
+COPY geo/* ./geo/
 
 # Expose the port that the Django app will run on
 EXPOSE 8000
