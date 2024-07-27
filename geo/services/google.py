@@ -32,11 +32,15 @@ class GoogleService:
             address (str): The address to geocode.
 
         Returns:
-            dict or None: The geocoded location as a dictionary with 'latitude' and 'longitude' keys,
+            tuple or None: The geocoded location as a dictionary with 'latitude' and 'longitude' keys,
             or None if the address could not be geocoded.
+            Tuple will consist of latitude, longitude and formatted_address
         """
         geocode_result = self.client.geocode(address)
         if geocode_result:
-            return geocode_result
+            first_result = geocode_result[0]
+            location = first_result['geometry']['location']
+            formatted_address = first_result['formatted_address']
+            return location['lat'], location['lng'], formatted_address
         else:
             return None

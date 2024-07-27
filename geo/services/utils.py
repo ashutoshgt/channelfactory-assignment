@@ -1,6 +1,18 @@
 import math
 
 def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the haversine distance between two points on the Earth's surface.
+
+    Args:
+        lat1 (float): Latitude of the first point in degrees.
+        lon1 (float): Longitude of the first point in degrees.
+        lat2 (float): Latitude of the second point in degrees.
+        lon2 (float): Longitude of the second point in degrees.
+
+    Returns:
+        float: The haversine distance between the two points in kilometers.
+    """
     # Convert latitude and longitude from degrees to radians
     lat1_rad = math.radians(lat1)
     lon1_rad = math.radians(lon1)
