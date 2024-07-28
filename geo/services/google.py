@@ -1,7 +1,5 @@
 import googlemaps
 
-import googlemaps
-
 class GoogleService:
     """
     A class that provides geocoding services using the Google Maps API.

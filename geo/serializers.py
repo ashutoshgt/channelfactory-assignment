@@ -12,9 +12,6 @@ class AddressSerializer(serializers.Serializer):
 
 	from_address = serializers.CharField(max_length=255)
 	destination_address = serializers.CharField(max_length=255)
-	formatted_from_address = serializers.CharField(max_length=255, read_only=True)
-	formatted_destination_address = serializers.CharField(max_length=255, read_only=True)
-	distance = serializers.FloatField(read_only=True)
 
 	def validate(self, data):
 		"""
