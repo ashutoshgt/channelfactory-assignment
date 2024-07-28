@@ -1,4 +1,7 @@
+import logging
 import googlemaps
+
+logger = logging.getLogger(__name__)
 
 class GoogleService:
     """
@@ -32,8 +35,11 @@ class GoogleService:
         Returns:
             dict: A dictionary containing the geocoded address information.
         """
+        logger.info("Geocoding address: %s", address)
+
         geocode_result = self.client.geocode(address)
         if geocode_result:
             return geocode_result[0]
         else:
+            logger.error("Could not geocode address: %s", address)
             return None
