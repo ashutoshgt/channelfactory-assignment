@@ -13,6 +13,9 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     Returns:
         float: The haversine distance between the two points in kilometers.
     """
+    if not all([lat1, lat2, lon1, lon2]):
+        return None
+    
     # Convert latitude and longitude from degrees to radians
     lat1_rad = math.radians(lat1)
     lon1_rad = math.radians(lon1)
