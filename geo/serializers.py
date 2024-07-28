@@ -1,9 +1,13 @@
 import re
+import logging
 from rest_framework import serializers
 
 from geo.services.google import GoogleService
 from geo.services.utils import haversine_distance
+from geo.constants import INVALID_FROM_ADDRESS, INVALID_DESTINATION_ADDRESS, GEOCODE_ERROR
 from api import settings
+
+logger = logging.getLogger(__name__)
 
 class AddressSerializer(serializers.Serializer):
 	"""
@@ -12,9 +16,6 @@ class AddressSerializer(serializers.Serializer):
 
 	from_address = serializers.CharField(max_length=255)
 	destination_address = serializers.CharField(max_length=255)
-	formatted_from_address = serializers.CharField(max_length=255, read_only=True)
-	formatted_destination_address = serializers.CharField(max_length=255, read_only=True)
-	distance = serializers.FloatField(read_only=True)
 
 	def validate(self, data):
 		"""
@@ -35,21 +36,23 @@ class AddressSerializer(serializers.Serializer):
 		destination_address = data.get("destination_address")
 
 		if not from_address or not re.match(address_pattern, from_address):
-			raise serializers.ValidationError("Invalid from_address")
+			logger.error("%s: %s", INVALID_FROM_ADDRESS, from_address)
+			raise serializers.ValidationError(INVALID_FROM_ADDRESS)
 
 		if not destination_address or not re.match(address_pattern, destination_address):
-			raise serializers.ValidationError("Invalid destination_address")
+			logger.error("%s: %s", INVALID_DESTINATION_ADDRESS, destination_address)
+			raise serializers.ValidationError(INVALID_DESTINATION_ADDRESS)
 
 		# Geocode both the origin and destination addresses
 		google_service = GoogleService(settings.GOOGLE_MAPS_API_KEY)
 
 		from_geocode_response = google_service.geocode(from_address)
 		if not from_geocode_response:
-			raise serializers.ValidationError("Could not geocode the from_address")
+			raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address")
 		
 		destination_geocode_response = google_service.geocode(destination_address)
 		if not destination_geocode_response:
-			raise serializers.ValidationError("Could not geocode the destination_address")
+			raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address")
 		
 		from_location = from_geocode_response.get("geometry", {}).get("location")
 		from_lat = from_location.get("lat") if from_location else None

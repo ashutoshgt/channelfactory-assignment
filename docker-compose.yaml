@@ -18,7 +18,7 @@ services:
       - PG_HOST=db
       - PG_PORT=5432
       - PG_DB=mydb
-      - GOOGLE_MAPS_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
   db:
     image: postgres:12
     environment:
