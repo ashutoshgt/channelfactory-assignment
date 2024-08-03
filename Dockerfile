@@ -17,6 +17,8 @@ COPY manage.py .
 COPY api/* ./api/
 COPY geo/* ./geo/
 
+ENV DJANGO_SETTINGS_MODULE=api.settings
+
 # Expose the port that the Django app will run on
 EXPOSE 8000
 

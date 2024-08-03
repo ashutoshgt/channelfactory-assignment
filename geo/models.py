@@ -16,7 +16,7 @@ class GeocodeCache(models.Model):
         __str__(): Returns a string representation of the geocode cache entry.
     """
 
-    input_address = models.CharField(max_length=255, db_collation='CI')
+    input_address = models.CharField(max_length=255)
     formatted_address = models.CharField(max_length=255)
     latitude = models.FloatField()
     longitude = models.FloatField()
