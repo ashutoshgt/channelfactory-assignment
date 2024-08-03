@@ -1,10 +1,10 @@
 # Build the Docker Compose service
 build:
-	docker-compose build api
+	docker compose build api
 
 # Run the Docker Compose service
 run:
-	docker-compose up api
+	docker compose up api
 
 # Build and run the Docker Compose service
 build-run:
@@ -13,10 +13,13 @@ build-run:
 
 # Stop the Docker Compose service
 stop:
-	docker-compose down --remove-orphans --volumes
+	docker compose down --remove-orphans --volumes
 
 # Run tests for the Docker Compose service
 test:
-	docker-compose run api pytest
+	docker compose run api pytest
 
-.PHONY: run stop test build build-run
+bash:
+	docker compose run api bash
+
+.PHONY: run stop test build build-run bash
