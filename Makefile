@@ -11,15 +11,19 @@ build-run:
 	make build
 	make run
 
-# Stop the Docker Compose service
 stop:
 	docker compose down --remove-orphans --volumes
 
-# Run tests for the Docker Compose service
-test:
-	docker compose run api pytest
+run-unit-tests:
+	docker compose run api pytest geo/tests/unit
 
-bash:
+run-integration-tests:
+	docker compose run api pytest geo/tests/integration
+
+run-bash:
 	docker compose run api bash
 
-.PHONY: run stop test build build-run bash
+run-migrations:
+	docker compose run api python manage.py migrate
+
+.PHONY: run stop build build-run run-bash run-migrations run-unit-tests run-integration-tests

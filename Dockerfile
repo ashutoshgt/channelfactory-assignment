@@ -17,6 +17,7 @@ COPY manage.py .
 COPY api/* ./api/
 COPY geo/* ./geo/
 
+# Set the DJANGO_SETTINGS_MODULE environment variable for shell
 ENV DJANGO_SETTINGS_MODULE=api.settings
 
 # Expose the port that the Django app will run on
