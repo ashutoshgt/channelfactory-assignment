@@ -1,12 +1,13 @@
-import re
 import logging
+import re
+
 from rest_framework import serializers
 
+from api import settings
+from geo.constants import (GEOCODE_ERROR, INVALID_DESTINATION_ADDRESS, INVALID_FROM_ADDRESS)
+from geo.models import GeocodeCache
 from geo.services.google import GoogleService
 from geo.services.utils import haversine_distance
-from geo.models import GeocodeCache
-from geo.constants import INVALID_FROM_ADDRESS, INVALID_DESTINATION_ADDRESS, GEOCODE_ERROR
-from api import settings
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class DistanceSerializer(serializers.Serializer):
 			data (dict): The input data containing from_address and destination_address.
 
 		Returns:
-			dict: The validated and geocoded data containing from_address, destination_address, and distance.
+			tuple: The geocoded from_address and destination_address objects of GeocodeCache.
 		"""
 		from_address = validated_data.get("from_address")
 		destination_address = validated_data.get("destination_address")
@@ -75,8 +76,7 @@ class DistanceSerializer(serializers.Serializer):
 			geocode_response = google_service.geocode(from_address)
 			
 			if not geocode_response:
-				logger.error("%s: %s", GEOCODE_ERROR, from_address)
-				raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address")
+				raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address: {from_address}")
 			
 			cache_from_address_serializer = GeocodeCacheSerializer(data={
 				"input_address": from_address,
@@ -101,8 +101,7 @@ class DistanceSerializer(serializers.Serializer):
 			logger.info("Cache miss for destination_address: %s", destination_address)
 			geocode_response = google_service.geocode(destination_address)
 			if not geocode_response:
-				logger.error("%s: %s", GEOCODE_ERROR, destination_address)
-				raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address")
+				raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address: {destination_address}")
 			
 			cache_dest_address_serializer = GeocodeCacheSerializer(data={
 				"input_address": destination_address,
