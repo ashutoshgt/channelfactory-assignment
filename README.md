@@ -8,9 +8,12 @@ API asked as part of the channelfactory assignment
 4. To run the API locally, execute the following command under the root directory of this project
 ```
 make build-run
+make run-migrations
+(The second command can be used anytime we remove the db volume)
 ```
 This will create an api service along with a postgres database, which you can connect to using the credentials found in the docker-compose.yaml file
-(although it's not being used right now)
+
+## Running test cases
 
 ## API Specifications:
 
@@ -50,7 +53,7 @@ POST
 ### Error Responses (4xx):
 ```
 1. {"from_address": ["This field is required."]}
-2. {"non_field_errors": ["Could not geocode the from_address"]}
+2. ["Could not geocode from_address"]
 ```
 
 ### Sample Requests:
@@ -68,13 +71,13 @@ Response:
         "original":"qutub minar",
         "lat":28.5244946,
         "long":77.18551769999999,
-        "formatted_address":"Seth Sarai, Mehrauli, New Delhi, Delhi 110030, India"
+        "formatted":"Seth Sarai, Mehrauli, New Delhi, Delhi 110030, India"
     },
     "destination_address":{
         "original":"india gate",
         "lat":28.612912,
         "long":77.2295097,
-        "formatted_address":"Kartavya Path, India Gate, New Delhi, Delhi 110001, India"
+        "formatted":"Kartavya Path, India Gate, New Delhi, Delhi 110001, India"
     },
     "distance":10.729218711890798
 }
@@ -106,3 +109,6 @@ Response:
     "destination_address":["This field is required."]
 }
 ```
+### Future Improvements/Pending Tasks:
+1. Add a cache bursting mechanism
+2. On running unit test cases, db container starts as well, can be changed to only run the api container

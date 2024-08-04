@@ -1,6 +1,7 @@
+from geo.services.utils import haversine_distance
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from geo.serializers import AddressSerializer
+from geo.serializers import DistanceSerializer
 
 @api_view(['POST'])
 def distance(request):
@@ -18,9 +19,12 @@ def distance(request):
 
     """
     
-    serialized_data = AddressSerializer(data=request.data)
+    distance_serializer = DistanceSerializer(data=request.data)
     
-    if not serialized_data.is_valid():
-        return Response(serialized_data.errors, status=400)
+    if not distance_serializer.is_valid():
+        return Response(distance_serializer.errors, status=400)
     
-    return Response(serialized_data.validated_data)
+    # Get the response from the calculate_distance method
+    response = distance_serializer.calculate_distance()
+
+    return Response(response)
