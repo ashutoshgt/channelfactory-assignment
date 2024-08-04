@@ -53,7 +53,8 @@ POST
 ### Error Responses (4xx):
 ```
 1. {"from_address": ["This field is required."]}
-2. ["Could not geocode from_address"]
+2. {"from_address": ["Invalid from address: Niti khand-1 Indirapuram&$"]}
+3. ["Could not geocode from_address"]
 ```
 
 ### Sample Requests:

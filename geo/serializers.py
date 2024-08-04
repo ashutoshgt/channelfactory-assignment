@@ -35,7 +35,7 @@ class DistanceSerializer(serializers.Serializer):
 		"""
 		if not re.match(self.ADDRESS_PATTERN, value):
 			logger.error("%s: %s", INVALID_FROM_ADDRESS, value)
-			raise serializers.ValidationError(INVALID_FROM_ADDRESS)
+			raise serializers.ValidationError(f"{INVALID_FROM_ADDRESS}: {value}")
 		return value
 
 	def validate_destination_address(self, value):
@@ -46,7 +46,7 @@ class DistanceSerializer(serializers.Serializer):
 		"""
 		if not re.match(self.ADDRESS_PATTERN, value):
 			logger.error("%s: %s", INVALID_DESTINATION_ADDRESS, value)
-			raise serializers.ValidationError(INVALID_DESTINATION_ADDRESS)
+			raise serializers.ValidationError(f"{INVALID_DESTINATION_ADDRESS}: {value}")
 		return value
 
 	def create(self, validated_data):
@@ -67,7 +67,7 @@ class DistanceSerializer(serializers.Serializer):
 
 		# Geocode the origin address
 		geocoded_from_address = GeocodeCache.objects.filter(
-			input_address=from_address.lower()
+			input_address__iexact=from_address
 		).first()
 		if not geocoded_from_address:
 			logger.info("Cache miss for from_address: %s", from_address)
@@ -79,7 +79,7 @@ class DistanceSerializer(serializers.Serializer):
 				raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address")
 			
 			cache_from_address_serializer = GeocodeCacheSerializer(data={
-				"input_address": from_address.lower(),
+				"input_address": from_address,
 				"formatted_address": geocode_response.get("formatted_address"),
 				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
@@ -94,7 +94,7 @@ class DistanceSerializer(serializers.Serializer):
 		
 		# Geocode the destination address
 		geocoded_destination_address = GeocodeCache.objects.filter(
-			input_address=destination_address.lower()
+			input_address__iexact=destination_address
 		).first()
 		
 		if not geocoded_destination_address:
@@ -105,7 +105,7 @@ class DistanceSerializer(serializers.Serializer):
 				raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address")
 			
 			cache_dest_address_serializer = GeocodeCacheSerializer(data={
-				"input_address": destination_address.lower(),
+				"input_address": destination_address,
 				"formatted_address": geocode_response.get("formatted_address"),
 				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
