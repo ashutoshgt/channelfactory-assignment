@@ -14,7 +14,14 @@ make run-migrations
 This will create an api service along with a postgres database, which you can connect to using the credentials found in the docker-compose.yaml file
 
 ## Running test cases
-
+### Unit Tests
+```
+make run-unit-tests
+```
+### Integration Tests
+```
+make run-integration-tests
+```
 ## API Specifications:
 
 ### URI: 
