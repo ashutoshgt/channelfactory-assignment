@@ -15,10 +15,10 @@ stop:
 	docker compose down --remove-orphans --volumes
 
 run-unit-tests:
-	docker compose run api pytest geo/tests/unit
+	docker compose run api pytest --cov=geo geo/tests/unit
 
 run-integration-tests:
-	docker compose run api pytest geo/tests/integration
+	docker compose run api pytest --cov=geo geo/tests/integration
 
 run-bash:
 	docker compose run api bash
