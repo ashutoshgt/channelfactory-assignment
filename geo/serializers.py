@@ -85,33 +85,26 @@ class DistanceSerializer(serializers.Serializer):
 			if not geocode_response:
 				raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address: {from_address}")
 			
-			cache_from_address_serializer = GeocodeCacheSerializer(data={
+			from_geocode_data = {
 				"input_address": from_address,
 				"formatted_address": geocode_response.get("formatted_address"),
 				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
-			})
+			}
+			
+			geocoded_from_address = GeocodeCache(**from_geocode_data)
+			cache_from_address_serializer = GeocodeCacheSerializer(data=from_geocode_data)
 			
 			if cache_from_address_serializer.is_valid():
 				logger.info("Caching geocoded from_address: %s", from_address)
 				try:
 					geocoded_from_address = cache_from_address_serializer.save()
 				except Exception as e:
-					geocoded_from_address = GeocodeCache(
-						input_address=cache_from_address_serializer.data.get("input_address"),
-						formatted_address=cache_from_address_serializer.data.get("formatted_address"),
-						latitude=cache_from_address_serializer.data.get("latitude"),
-						longitude=cache_from_address_serializer.data.get("longitude")
-					)
 					logger.error("Error caching from_address: %s", e)
 			else:
 				logger.error("Error caching from_address: %s, errors: %s", from_address, cache_from_address_serializer.errors)
 		
 		# Geocode the destination address
-		geocoded_destination_address = GeocodeCache.objects.filter(
-			input_address__iexact=destination_address
-		).first()
-		
 		geocoded_destination_address = None
 		try:
 			# Check cache
@@ -128,24 +121,21 @@ class DistanceSerializer(serializers.Serializer):
 			if not geocode_response:
 				raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address: {destination_address}")
 			
-			cache_dest_address_serializer = GeocodeCacheSerializer(data={
+			dest_geocode_data = {
 				"input_address": destination_address,
 				"formatted_address": geocode_response.get("formatted_address"),
 				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
-			})
+			}
+
+			geocoded_destination_address = GeocodeCache(**dest_geocode_data)
+			cache_dest_address_serializer = GeocodeCacheSerializer(data=dest_geocode_data)
 
 			if cache_dest_address_serializer.is_valid():
 				logger.info("Caching geocoded destination_address: %s", destination_address)
 				try:
 					geocoded_destination_address = cache_dest_address_serializer.save()
 				except:
-					geocoded_destination_address = GeocodeCache(
-						input_address=cache_dest_address_serializer.data.get("input_address"),
-						formatted_address=cache_dest_address_serializer.data.get("formatted_address"),
-						latitude=cache_dest_address_serializer.data.get("latitude"),
-						longitude=cache_dest_address_serializer.data.get("longitude")
-					)
 					logger.error("Error caching destination_address: %s", destination_address)
 			else:
 				logger.error("Error caching destination_address: %s, errors: %s", destination_address, cache_dest_address_serializer.errors)
