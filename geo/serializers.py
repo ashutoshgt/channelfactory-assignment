@@ -67,9 +67,16 @@ class DistanceSerializer(serializers.Serializer):
 		google_service = GoogleService(settings.GOOGLE_MAPS_API_KEY)
 
 		# Geocode the origin address
-		geocoded_from_address = GeocodeCache.objects.filter(
-			input_address__iexact=from_address
-		).first()
+		geocoded_from_address = None
+		try:
+			# Check cache
+			geocoded_from_address = GeocodeCache.objects.filter(
+				input_address__iexact=from_address
+			).first()
+		except Exception as e:
+			# Fail silently
+			logger.error("Error fetching from_address from cache: %s", e)
+
 		if not geocoded_from_address:
 			logger.info("Cache miss for from_address: %s", from_address)
 			
@@ -85,17 +92,35 @@ class DistanceSerializer(serializers.Serializer):
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
 			})
 			
-			if not cache_from_address_serializer.is_valid():
-				logger.error(cache_from_address_serializer.errors)
-				raise serializers.ValidationError(cache_from_address_serializer.errors)
-			
-			logger.info("Caching geocoded from_address: %s", from_address)
-			geocoded_from_address = cache_from_address_serializer.save()
+			if cache_from_address_serializer.is_valid():
+				logger.info("Caching geocoded from_address: %s", from_address)
+				try:
+					geocoded_from_address = cache_from_address_serializer.save()
+				except Exception as e:
+					geocoded_from_address = GeocodeCache(
+						input_address=cache_from_address_serializer.data.get("input_address"),
+						formatted_address=cache_from_address_serializer.data.get("formatted_address"),
+						latitude=cache_from_address_serializer.data.get("latitude"),
+						longitude=cache_from_address_serializer.data.get("longitude")
+					)
+					logger.error("Error caching from_address: %s", e)
+			else:
+				logger.error("Error caching from_address: %s, errors: %s", from_address, cache_from_address_serializer.errors)
 		
 		# Geocode the destination address
 		geocoded_destination_address = GeocodeCache.objects.filter(
 			input_address__iexact=destination_address
 		).first()
+		
+		geocoded_destination_address = None
+		try:
+			# Check cache
+			geocoded_destination_address = GeocodeCache.objects.filter(
+				input_address__iexact=destination_address
+			).first()
+		except Exception as e:
+			# Fail silently
+			logger.error("Error fetching destination_address from cache: %s", e)
 		
 		if not geocoded_destination_address:
 			logger.info("Cache miss for destination_address: %s", destination_address)
@@ -110,12 +135,20 @@ class DistanceSerializer(serializers.Serializer):
 				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
 			})
 
-			if not cache_dest_address_serializer.is_valid():
-				logger.error(cache_dest_address_serializer.errors)
-				raise serializers.ValidationError(cache_dest_address_serializer.errors)
-			
-			logger.info("Caching geocoded destination_address: %s", destination_address)
-			geocoded_destination_address = cache_dest_address_serializer.save()
+			if cache_dest_address_serializer.is_valid():
+				logger.info("Caching geocoded destination_address: %s", destination_address)
+				try:
+					geocoded_destination_address = cache_dest_address_serializer.save()
+				except:
+					geocoded_destination_address = GeocodeCache(
+						input_address=cache_dest_address_serializer.data.get("input_address"),
+						formatted_address=cache_dest_address_serializer.data.get("formatted_address"),
+						latitude=cache_dest_address_serializer.data.get("latitude"),
+						longitude=cache_dest_address_serializer.data.get("longitude")
+					)
+					logger.error("Error caching destination_address: %s", destination_address)
+			else:
+				logger.error("Error caching destination_address: %s, errors: %s", destination_address, cache_dest_address_serializer.errors)
 			
 		return geocoded_from_address, geocoded_destination_address
 
