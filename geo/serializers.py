@@ -1,23 +1,17 @@
 import logging
 import re
 
+from django.db.utils import Error
 from rest_framework import serializers
 
 from api import settings
-from geo.constants import (GEOCODE_ERROR, INVALID_DESTINATION_ADDRESS, INVALID_FROM_ADDRESS)
+from geo.constants import (GEOCODE_ERROR, INVALID_DESTINATION_ADDRESS,
+                           INVALID_FROM_ADDRESS)
 from geo.models import GeocodeCache
 from geo.services.google import GoogleService
 from geo.services.utils import haversine_distance
 
 logger = logging.getLogger(__name__)
-
-class GeocodeCacheSerializer(serializers.ModelSerializer):
-	"""
-	Serializer for the GeocodeCache model.
-	"""
-	class Meta:
-		model = GeocodeCache
-		fields = ['input_address', 'latitude', 'longitude', 'formatted_address']
 
 class DistanceSerializer(serializers.Serializer):
 	"""
@@ -50,6 +44,55 @@ class DistanceSerializer(serializers.Serializer):
 			raise serializers.ValidationError(f"{INVALID_DESTINATION_ADDRESS}: {value}")
 		return value
 
+	def geocode(self, address) -> GeocodeCache:
+		"""
+		Geocodes the given address using the Google Maps API.
+
+		Args:
+			address (str): The address to be geocoded.
+
+		Returns:
+			GeocodeCache: The geocoded address information.
+
+		Raises:
+			serializers.ValidationError: If the geocoding fails or the address is invalid.
+		"""
+
+		google_service = GoogleService(settings.GOOGLE_MAPS_API_KEY)
+
+		geocoded_address = None
+
+		try:
+			# Check cache
+			geocoded_address = GeocodeCache.objects.filter(input_address__iexact=address).first()
+		except Error as e:
+			# Fail silently
+			logger.error("Error fetching address from cache: %s", e)
+
+		if not geocoded_address:
+			logger.info("Cache miss for address: %s", address)
+
+			geocode_response = google_service.geocode(address)
+
+			if not geocode_response:
+				raise serializers.ValidationError(f"{GEOCODE_ERROR} address: {address}")
+
+			geocoded_data = {
+				"input_address": address,
+				"formatted_address": geocode_response.get("formatted_address"),
+				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
+				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
+			}
+
+			logger.info("Caching geocoded address: %s", address)
+			try:
+				geocoded_address = GeocodeCache.objects.create(**geocoded_data)
+			except Error as e:
+				logger.error("Error caching address: %s", e)
+				geocoded_address = GeocodeCache(**geocoded_data)
+
+		return geocoded_address
+
 	def create(self, validated_data):
 		"""
 		Geocodes both the origin and destination addresses if not present in cache.
@@ -63,61 +106,8 @@ class DistanceSerializer(serializers.Serializer):
 		"""
 		from_address = validated_data.get("from_address")
 		destination_address = validated_data.get("destination_address")
-
-		google_service = GoogleService(settings.GOOGLE_MAPS_API_KEY)
-
-		# Geocode the origin address
-		geocoded_from_address = GeocodeCache.objects.filter(
-			input_address__iexact=from_address
-		).first()
-		if not geocoded_from_address:
-			logger.info("Cache miss for from_address: %s", from_address)
 			
-			geocode_response = google_service.geocode(from_address)
-			
-			if not geocode_response:
-				raise serializers.ValidationError(f"{GEOCODE_ERROR} from_address: {from_address}")
-			
-			cache_from_address_serializer = GeocodeCacheSerializer(data={
-				"input_address": from_address,
-				"formatted_address": geocode_response.get("formatted_address"),
-				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
-				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
-			})
-			
-			if not cache_from_address_serializer.is_valid():
-				logger.error(cache_from_address_serializer.errors)
-				raise serializers.ValidationError(cache_from_address_serializer.errors)
-			
-			logger.info("Caching geocoded from_address: %s", from_address)
-			geocoded_from_address = cache_from_address_serializer.save()
-		
-		# Geocode the destination address
-		geocoded_destination_address = GeocodeCache.objects.filter(
-			input_address__iexact=destination_address
-		).first()
-		
-		if not geocoded_destination_address:
-			logger.info("Cache miss for destination_address: %s", destination_address)
-			geocode_response = google_service.geocode(destination_address)
-			if not geocode_response:
-				raise serializers.ValidationError(f"{GEOCODE_ERROR} destination_address: {destination_address}")
-			
-			cache_dest_address_serializer = GeocodeCacheSerializer(data={
-				"input_address": destination_address,
-				"formatted_address": geocode_response.get("formatted_address"),
-				"latitude": geocode_response.get("geometry", {}).get("location", {}).get("lat"),
-				"longitude": geocode_response.get("geometry", {}).get("location", {}).get("lng")
-			})
-
-			if not cache_dest_address_serializer.is_valid():
-				logger.error(cache_dest_address_serializer.errors)
-				raise serializers.ValidationError(cache_dest_address_serializer.errors)
-			
-			logger.info("Caching geocoded destination_address: %s", destination_address)
-			geocoded_destination_address = cache_dest_address_serializer.save()
-			
-		return geocoded_from_address, geocoded_destination_address
+		return self.geocode(from_address), self.geocode(destination_address)
 
 	def calculate_distance(self) -> dict:
 		"""

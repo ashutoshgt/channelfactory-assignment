@@ -11,7 +11,6 @@ def invalid_geocode_response():
             "https://maps.googleapis.com/maps/api/geocode/json",
             json={"results": [], "status": "ZERO_RESULTS"},
         )
-
         yield mock
 
 @pytest.fixture
