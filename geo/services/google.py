@@ -39,7 +39,6 @@ class GoogleService:
         logger.info("Geocoding address: %s", address)
 
         geocode_result = self.client.geocode(address)
-        print(geocode_result)
         if geocode_result:
             return geocode_result[0]
         else:
