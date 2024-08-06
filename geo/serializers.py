@@ -5,7 +5,8 @@ from django.db.utils import Error
 from rest_framework import serializers
 
 from api import settings
-from geo.constants import (GEOCODE_ERROR, INVALID_DESTINATION_ADDRESS, INVALID_FROM_ADDRESS)
+from geo.constants import (GEOCODE_ERROR, INVALID_DESTINATION_ADDRESS,
+                           INVALID_FROM_ADDRESS)
 from geo.models import GeocodeCache
 from geo.services.google import GoogleService
 from geo.services.utils import haversine_distance
