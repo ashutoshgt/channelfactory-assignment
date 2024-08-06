@@ -45,13 +45,13 @@ POST
         "original": "string",
         "formatted": "string",
         "lat": float,
-        "lng": float
+        "long": float
     },
     "destination_address": {
         "original": "string",
         "formatted": "string",
         "lat": float,
-        "lng": float
+        "long": float
     },
     "distance": float
 }
@@ -61,7 +61,7 @@ POST
 ```
 1. {"from_address": ["This field is required."]}
 2. {"from_address": ["Invalid from address: <invalid address>"]}
-3. ["Could not geocode from_address: <invalid address>"]
+3. ["Could not geocode address: <invalid address>"]
 ```
 
 ### Sample Requests:
@@ -101,7 +101,7 @@ curl --location 'http://localhost:8000/v1/api/distance' \
 
 Response:
 {
-    "non_field_errors": ["Could not geocode the from_address"]
+    ["Could not geocode address: None"]
 }
 ```
 
