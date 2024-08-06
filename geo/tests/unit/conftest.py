@@ -16,3 +16,8 @@ def mock_geocode_cache():
 @pytest.fixture
 def distance_serializer():
     return DistanceSerializer()
+
+@pytest.fixture
+def mock_google_client():
+    with patch('geo.services.google.googlemaps.Client') as MockGoogleClient:
+        yield MockGoogleClient
