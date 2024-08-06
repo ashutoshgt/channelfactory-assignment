@@ -92,7 +92,7 @@ class TestDistanceAPI:
             content_type="application/json",
         )
         assert response.data == [
-            ErrorDetail(string="Could not geocode from_address: none", code="invalid")
+            ErrorDetail(string="Could not geocode address: none", code="invalid")
         ]
         assert response.status_code == 400
 
