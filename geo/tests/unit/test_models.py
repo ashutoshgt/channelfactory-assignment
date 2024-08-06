@@ -1,6 +1,8 @@
-from django.utils import timezone
 from django.db import models
+from django.utils import timezone
+
 from geo.models import GeocodeCache
+
 
 class TestGeocodeCache:
     
@@ -58,4 +60,3 @@ class TestGeocodeCache:
         )
         expected_str = "123 Main St -> 37.123456, -122.987654"
         assert str(geocode_cache) == expected_str
-    

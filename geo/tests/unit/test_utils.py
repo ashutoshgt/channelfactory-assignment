@@ -1,5 +1,7 @@
 import pytest
+
 from geo.services.utils import haversine_distance
+
 
 def test_haversine_distance():
     """

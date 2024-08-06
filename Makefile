@@ -18,7 +18,7 @@ run-unit-tests:
 	docker compose run api pytest --cov=geo geo/tests/unit
 
 run-integration-tests:
-	docker compose run api pytest --cov=geo geo/tests/integration
+	docker compose run -e GOOGLE_MAPS_API_KEY=AIzaSyC68HUPUUMUa2 api pytest --cov=geo geo/tests/integration
 
 run-bash:
 	docker compose run api bash

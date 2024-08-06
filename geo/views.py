@@ -1,7 +1,8 @@
-from geo.services.utils import haversine_distance
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from geo.serializers import DistanceSerializer
+
 
 @api_view(['POST'])
 def distance(request):

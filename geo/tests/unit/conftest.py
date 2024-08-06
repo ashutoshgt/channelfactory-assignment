@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import patch
 
+import pytest
+
 from geo.serializers import DistanceSerializer
+
 
 @pytest.fixture
 def mock_google_service():

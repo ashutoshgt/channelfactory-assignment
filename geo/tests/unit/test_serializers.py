@@ -1,9 +1,7 @@
-from unittest.mock import patch
 import pytest
 from django.db.utils import Error
 from rest_framework.exceptions import ValidationError
 
-from geo.models import GeocodeCache
 from geo.serializers import DistanceSerializer
 
 

@@ -1,10 +1,11 @@
 import json
 
-from geo.models import GeocodeCache
 import pytest
 import requests_mock
 from django.urls import reverse
 from rest_framework.exceptions import ErrorDetail
+
+from geo.models import GeocodeCache
 
 DISTANCE_URL = reverse("distance")
 
