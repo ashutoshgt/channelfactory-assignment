@@ -24,7 +24,6 @@ class GoogleService:
         if not cls._instance:
             cls._instance = super().__new__(cls)
             cls._instance.client = googlemaps.Client(api_key)
-        print(cls._instance.client)
         return cls._instance
 
     def geocode(self, address):
